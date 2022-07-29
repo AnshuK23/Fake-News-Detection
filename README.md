@@ -2,6 +2,12 @@
 
 #### **This is official repository of Team No. 33 from 21BAI branch, Vellore Institute of Technology, Bhopal Campus.**
 
+### Team Members
+-   Anshu Kushwah[https://www.linkedin.com/in/anshu-kushwah-59851121b/] 21BAI10141
+-   Aaron Antony Noronha 21BAI10296
+-   Abhit Yadav 21BAI10397
+-   Shambavi Pandey 21BAI10453
+-   Simran Namdev 21BAI10472
 
 
 ## Contribution Guidelines
