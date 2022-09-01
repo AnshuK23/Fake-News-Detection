@@ -1,31 +1,23 @@
 import numpy as np
 import pandas as pd
-import itertools
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import PassiveAggressiveClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
-#Read the data
-news=pd.read_csv('C:\\Users\\Admin\\OneDrive\\Desktop\\Project\\PolitiFact01.csv')
 
-#Get shape and head
-print(news.shape)
-print(news.head())
+# Read the data
+news = pd.read_csv('C:\\Users\\Admin\\OneDrive\\Desktop\\Project\\Final.csv')
 
-column_n = ['Unnamed: 0', 'Headline',  'Target']
+
+
+column_n = ['Unnamed: 0', 'Headline', 'Target']
 remove_c = ['Unnamed: 0']
 categorical_features = []
 target_col = ['Target']
-text_f = ['Headline']
-x = np.array(news["Headline"])
+text_f = ['title']
+x = np.array(news["title"])
 y = np.array(news["Target"])
 
 import nltk
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('omw-1.4')
 from nltk.corpus import stopwords
 import re
 from nltk.stem.porter import PorterStemmer
@@ -37,10 +29,14 @@ wnl = nltk.stem.WordNetLemmatizer()
 stop_words = stopwords.words('english')
 stopwords_dict = Counter(stop_words)
 
-# Removed unused clumns
-def remove_unused_c(df,column_n=remove_c):
-    df = df.drop(column_n,axis=1)
+
+# Removed unused columns
+def remove_unused_c(df, column_n=None):
+    if column_n is None:
+        column_n = remove_c
+    df = df.drop(column_n, axis=1)
     return df
+
 
 # Impute null values with None
 def null_process(feature_df):
@@ -48,12 +44,14 @@ def null_process(feature_df):
         feature_df.loc[feature_df[col].isnull(), col] = "None"
     return feature_df
 
+
 def clean_dataset(df):
     # remove unused column
     df = remove_unused_c(df)
-    #impute null values
+    # impute null values
     df = null_process(df)
     return df
+
 
 # Cleaning text from unused characters
 def clean_text(text):
@@ -62,8 +60,9 @@ def clean_text(text):
     text = str(text).replace('[^a-zA-Z]', ' ')
     text = str(text).replace(r'\s\s+', ' ')
     text = text.lower().strip()
-    #text = ' '.join(text)
+    # text = ' '.join(text)
     return text
+
 
 ## Nltk Preprocessing include:
 # Stop words, Stemming and Lemmetization
@@ -71,15 +70,16 @@ def clean_text(text):
 def nltk_preprocess(text):
     text = clean_text(text)
     wordlist = re.sub(r'[^\w\s]', '', text).split()
-    #text = ' '.join([word for word in wordlist if word not in stopwords_dict])
-    #text = [ps.stem(word) for word in wordlist if not word in stopwords_dict]
+    # text = ' '.join([word for word in wordlist if word not in stopwords_dict])
+    # text = [ps.stem(word) for word in wordlist if not word in stopwords_dict]
     text = ' '.join([wnl.lemmatize(word) for word in wordlist if word not in stopwords_dict])
-    return  text
+    return text
+
 
 # Perform data cleaning on train and test dataset by calling clean_dataset function
 df = clean_dataset(news)
 # apply preprocessing on headline through apply method by calling the function nltk_preprocess
-df["Headline"] = df.Headline.apply(nltk_preprocess)
+df["title"] = df.title.apply(nltk_preprocess)
 
 cv = CountVectorizer()
 x = cv.fit_transform(x)
@@ -87,10 +87,13 @@ x = cv.fit_transform(x)
 xtrain, xtest, ytrain, ytest = train_test_split(x, y, test_size=0.2, random_state=42)
 model = MultinomialNB()
 model.fit(xtrain, ytrain)
-print('Score of model=',model.score(xtest, ytest))
+
 
 import streamlit as st
+
 st.title("Fake News Checker")
+
+
 def fakenewsdetection():
     user = st.text_area("Enter The News that needs to be checked: ")
     if len(user) < 1:
@@ -100,4 +103,6 @@ def fakenewsdetection():
         data = cv.transform([sample]).toarray()
         a = model.predict(data)
         st.title(a)
+
+
 fakenewsdetection()
